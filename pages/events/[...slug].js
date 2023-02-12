@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { getFilteredEvents } from "../../util/apiUtil";
 import EventList from "../../components/events/EventList";
 import { Fragment, useEffect, useState } from "react";
@@ -12,7 +13,8 @@ const FilteredEventsPage = (props) => {
   const filteredData = router.query.slug;
   const [loadedEvents, setLoadedEvents] = useState();
   const { data, error } = useSWR(
-    "https://nextjs-course-15f9b-default-rtdb.firebaseio.com/events.json"
+    "https://nextjs-course-15f9b-default-rtdb.firebaseio.com/events.json",
+    (url) => fetch(url).then((res) => res.json())
   );
   useEffect(() => {
     if (data) {
@@ -26,14 +28,36 @@ const FilteredEventsPage = (props) => {
       setLoadedEvents(events);
     }
   }, [data]);
+
+  let pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content={`List of filtered events`} />
+    </Head>
+  );
   if (!loadedEvents) {
-    return <p className="center">Loading</p>;
+    return (
+      <Fragment>
+        {pageHeadData}
+        <p className="center">Loading</p>{" "}
+      </Fragment>
+    );
   }
+
   const filteredYear = filteredData[0];
   const filteredMonth = filteredData[1];
   const numYear = +filteredYear;
   const numMonth = +filteredMonth;
 
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta
+        name="description"
+        content={`All events for ${numMonth}/${numYear}`}
+      />
+    </Head>
+  );
   if (
     isNaN(numMonth) ||
     isNaN(numYear) ||
@@ -43,6 +67,7 @@ const FilteredEventsPage = (props) => {
   ) {
     return (
       <Fragment>
+        {pageHeadData}
         <ErrorAlert>
           <p>Invalid filter. Please adjust your values!</p>
         </ErrorAlert>
@@ -74,7 +99,6 @@ const FilteredEventsPage = (props) => {
     );
   }
 
-  const events = props.events;
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
       <Fragment>
@@ -87,11 +111,13 @@ const FilteredEventsPage = (props) => {
       </Fragment>
     );
   }
+  const date = new Date(numMonth + "" + numYear);
 
   return (
     <Fragment>
+      {pageHeadData}
       <ResultsTitle date={date} />
-      <EventList data={events} />
+      <EventList data={filteredEvents} />
     </Fragment>
   );
 };

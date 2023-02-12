@@ -1,8 +1,15 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
 import Layout from "../components/layout/Layout";
-
+import Head from "next/head";
 function MyApp({ Component, pageProps }) {
-  return <Layout><Component {...pageProps} /></Layout>
+  return (
+    <Layout>
+      <Head>
+        <title>Main page</title>
+      </Head>
+      <Component {...pageProps} />
+    </Layout>
+  );
 }
 
-export default MyApp
+export default MyApp;
